@@ -26,4 +26,4 @@ antlr:
 	$(ANTR4_CMD) $(ANTLR_OPTS) -o $(ANTLR_DIR) cc.g4
 
 clean:
-	rm -rf $(ANTLR_OBJS) main.o $(EXEC)
+	rm -rf $(ANTLR_OBJS) $(OBJS) $(EXEC)
