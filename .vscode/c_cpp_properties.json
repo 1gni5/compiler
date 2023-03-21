@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/generated",
+                "${workspaceFolder}/src/generated",
                 "/usr/local/include/antlr4-runtime"
             ],
             "defines": [],
