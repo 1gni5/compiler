@@ -17,7 +17,7 @@ RUN unzip /tmp/antlr4-cpp-runtime-4.12.0-source.zip -d /tmp && \
 FROM alpine:3.17.2 as runtime
 
 # # Install packages
-RUN apk add --no-cache zsh openjdk11-jre
+RUN apk add --no-cache zsh openjdk11-jre make g++
 RUN wget https://www.antlr.org/download/antlr-4.12.0-complete.jar -P /usr/local/lib
 
 # Set environment 
@@ -26,4 +26,6 @@ RUN echo "alias antlr4='java -jar /usr/local/lib/antlr-4.12.0-complete.jar'" > /
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/local/include/ /usr/local/include/
 
+# Set working directory
+WORKDIR /app
 CMD ["/bin/zsh"]
