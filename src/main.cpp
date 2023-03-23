@@ -8,7 +8,7 @@
 #include "generated/ccParser.h"
 #include "generated/ccBaseVisitor.h"
 
-#include "arm64Visitor.h"
+#include "x86_64Visitor.h"
 
 using namespace antlr4;
 using namespace std;
@@ -44,7 +44,7 @@ int main(int argn, const char **argv)
   }
 
   
-  arm64Visitor v;
+  x86_64Visitor v;
   v.visit(tree);
 
   return 0;
