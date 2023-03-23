@@ -1,4 +1,4 @@
-FROM alpine:3.17.2 AS build
+FROM --platform=linux/amd64 alpine:3.17.2 AS build
 
 # Install compilation tools
 RUN apk add --no-cache build-base cmake clang make
@@ -10,11 +10,10 @@ RUN unzip /tmp/antlr4-cpp-runtime-4.12.0-source.zip -d /tmp && \
     mkdir build && \
     cd build && \
     cmake .. && \
-    make && \
+    make -j8 && \
     make install
 
-
-FROM alpine:3.17.2 as runtime
+FROM --platform=linux/amd64 alpine:3.17.2 as runtime
 
 # # Install packages
 RUN apk add --no-cache zsh openjdk11-jre make g++

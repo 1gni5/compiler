@@ -12,7 +12,7 @@ CCFLAGS=-std=c++20 -Wno-attributes -I$(ANTLR4_INCLUDE) -I$(ANTLR_DIR) -g
 LDFLAGS=-L$(ANTLR4_LIB) -lantlr4-runtime
 EXEC=cc
 
-OBJS=main.o arm64Visitor.o
+OBJS=main.o x86_64Visitor.o
 
 default: all
 all: $(OBJS) $(ANTLR_OBJS)
