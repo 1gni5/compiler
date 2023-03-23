@@ -4,7 +4,12 @@ axiom : program EOF ;
 
 program : 'int' 'main' '(' ')' '{' returnStmt '}' ;
 
-returnStmt: RETURN CONST ';' ;
+returnStmt: RETURN expr ';' ;
+expr: 
+    expr op=( '*' | '/' ) expr # multiplication
+    | expr op=( '+' | '-' ) expr # addition
+    | CONST # constExpression
+    | '(' expr ')' # parenthesis;
 
 RETURN : 'return' ;
 CONST : [0-9]+ ;
