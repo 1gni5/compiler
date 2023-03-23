@@ -1,5 +1,5 @@
 #include <iostream>
-#include <sstream>
+#include <exception>
 
 #include "antlr4-runtime.h"
 #include "x86_64Visitor.h"
@@ -18,9 +18,19 @@ any x86_64Visitor::visitProgram(ccParser::ProgramContext *ctx)
          << "main:\n"
          << "\tpushq\t%rbp\n"
          << "\tmovq\t%rsp, %rbp\n" << endl;
-    visit(ctx->returnStmt());
+    visit(ctx->compound());
     return 0;
 }
+
+any x86_64Visitor::visitCompound(ccParser::CompoundContext *ctx)
+{
+    for (auto& stmt : ctx->statement())
+    {
+        visit(stmt);
+    }
+    return 0;
+}
+
 
 any x86_64Visitor::visitReturnStmt(ccParser::ReturnStmtContext *ctx)
 {
@@ -31,6 +41,42 @@ any x86_64Visitor::visitReturnStmt(ccParser::ReturnStmtContext *ctx)
     return 0;
 }
 
+any x86_64Visitor::visitDeclaration(ccParser::DeclarationContext *ctx) 
+{
+    // Register in table of characters
+    for (auto& id : ctx->IDENTIFIER())
+    {
+        string name = id->getText();
+        if (symbols.contains(name)) {throw runtime_error("Already declared.");}
+        symbols[name] = (symbols.size() + 1) * 4;
+    }
+
+    if (ctx->expr() != nullptr)
+    {
+        size_t index = ctx->IDENTIFIER().size();
+        string left = ctx->IDENTIFIER(index - 1)->getText();
+        string right = any_cast<string>(visit(ctx->expr()));
+
+        cout << "\tmovl\t-" << symbols[right] << "(%rbp)" << ", %eax\n"
+             << "\tmovl\t %eax, -" << symbols[left] << "(%rbp)" << endl;
+        
+        return left;
+    }
+
+    return 0;
+}
+
+any x86_64Visitor::visitAssignement(ccParser::AssignementContext *ctx)
+{
+    string left = ctx->IDENTIFIER()->getText();
+    string right = any_cast<string>(visit(ctx->expr()));
+
+    cout << "\tmovl\t-" << symbols[right] << "(%rbp)" << ", %eax\n"
+         << "\tmovl\t %eax, -" << symbols[left] << "(%rbp)" << endl;
+    
+    return left;
+}
+
 any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
 {
     string name = "$tmp" + to_string(symbols.size());
@@ -38,6 +84,13 @@ any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
     cout << "\tmovl\t$" << ctx->CONST()->getText()
          << ", -" << symbols[name] << "(%rbp)\n" << endl;
 
+    return name;
+}
+
+any x86_64Visitor::visitVarExpression(ccParser::VarExpressionContext *ctx)
+{
+    string name = ctx->IDENTIFIER()->getText();
+    if (!symbols.contains(name)) {throw runtime_error("Not declared.");}
     return name;
 }
 

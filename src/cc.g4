@@ -2,16 +2,21 @@ grammar cc;
 
 axiom : program EOF ;
 
-program : 'int' 'main' '(' ')' '{' returnStmt '}' ;
+program : 'int' 'main' '(' ')' compound ;
+compound : '{' statement* '}' ;
 
-returnStmt: RETURN expr ';' ;
+statement : assignement | declaration | returnStmt;
+returnStmt: 'return' expr ';' ;
+declaration: 'int' IDENTIFIER (',' IDENTIFIER)* ('=' expr)?';' ;
+assignement: IDENTIFIER '=' expr ';' ;
 expr: 
     expr op=( '*' | '/' ) expr # multiplication
     | expr op=( '+' | '-' ) expr # addition
     | CONST # constExpression
+    | IDENTIFIER # varExpression
     | '(' expr ')' # parenthesis;
 
-RETURN : 'return' ;
+IDENTIFIER : [a-zA-Z]+;
 CONST : [0-9]+ ;
 COMMENT : '/*' .*? '*/' -> skip ;
 DIRECTIVE : '#' .*? '\n' -> skip ;
