@@ -4,12 +4,24 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "make -j4",
+            "command": "make -j8",
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}/src"
             },
             "group": {
                 "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "python3 cc-test.py -w cc-wrapper.sh testfiles/",
+            "options": {
+                "cwd": "${workspaceFolder}/tests"
+            },
+            "group": {
+                "kind": "test",
                 "isDefault": true
             }
         }
