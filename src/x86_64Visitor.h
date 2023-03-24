@@ -26,6 +26,7 @@ public:
   virtual std::any visitVarExpression(ccParser::VarExpressionContext *ctx);
 
   virtual std::any visitComparison(ccParser::ComparisonContext *ctx);
+  virtual std::any visitUnary(ccParser::UnaryContext *ctx);
 
 private:
   map<string, size_t> symbols;

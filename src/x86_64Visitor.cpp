@@ -178,3 +178,28 @@ any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
     
     return name;
 }
+
+
+any x86_64Visitor::visitUnary(ccParser::UnaryContext *ctx)
+{
+    string right = any_cast<string>(visit(ctx->expr()));
+
+    string name = "$tmp" + to_string(symbols.size());
+    symbols[name] = (symbols.size() + 1) * 4; 
+
+    if (ctx->op->getText() == "-")
+    {
+        cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
+             << "\txorl\t%eax, %eax\n" 
+             << "\tsubl\t-" << symbols[right] << "(%rbp), %eax" << endl;
+    } else {
+        cout << "\tcmpl\t$0,-" << symbols[right] << "(%rbp)\n"
+             << "\tsetne\t%al\n"
+             << "\txorb\t$-1, %al\n"
+             << "\tandb\t$1, %al\n"
+             << "\tmovzbl\t%al, %eax" << endl;
+    }
+    cout << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl;
+
+    return name;
+}

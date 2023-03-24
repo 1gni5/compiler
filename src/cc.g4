@@ -13,6 +13,7 @@ expr:
     expr op=( '*' | '/' ) expr # multiplication
     | expr op=( '+' | '-' ) expr # addition
     | expr op=( '>=' | '<=' | '==' | '!=' | '>' | '<' ) expr # comparison
+    | op=('-' | '!') expr # unary
     | CONST # constExpression
     | IDENTIFIER # varExpression
     | '(' expr ')' # parenthesis;
