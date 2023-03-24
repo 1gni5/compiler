@@ -130,7 +130,7 @@ any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
     if (ctx->op->getText() == "*")
     {
         cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
-            << "\timul\t-" << symbols[right] << "(%rbp), %eax\n"
+            << "\timull\t-" << symbols[right] << "(%rbp), %eax\n"
             << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)\n" << endl;
     } else 
     {
@@ -147,4 +147,34 @@ any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
 any x86_64Visitor::visitParenthesis(ccParser::ParenthesisContext *ctx)
 {
     return visit(ctx->expr());
+}
+
+
+any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
+{
+    string left = any_cast<string>(visit(ctx->expr(0)));
+    string right = any_cast<string>(visit(ctx->expr(1)));
+
+    string name = "$tmp" + to_string(symbols.size());
+    symbols[name] = (symbols.size() + 1) * 4;
+
+
+    string op = ctx->op->getText();
+    map<string, string> verbs = {
+        {"==", "sete"},
+        {"!=", "setne"},
+        {">=", "setge"},
+        {"<=", "setle"},
+        {">", "setg"},
+        {"<", "setl"},
+    };
+
+    cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
+         << "\tcmpl\t-" << symbols[right] << "(%rbp), %eax\n"
+         << "\t" << verbs[op] << "\t%al\n"
+         << "\tandb\t$1, %al\n"
+         << "\tmovzbl\t%al, %eax\n" 
+         << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl;
+    
+    return name;
 }

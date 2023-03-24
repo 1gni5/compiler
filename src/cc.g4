@@ -12,6 +12,7 @@ assignement: IDENTIFIER '=' expr ';' ;
 expr: 
     expr op=( '*' | '/' ) expr # multiplication
     | expr op=( '+' | '-' ) expr # addition
+    | expr op=( '>=' | '<=' | '==' | '!=' | '>' | '<' ) expr # comparison
     | CONST # constExpression
     | IDENTIFIER # varExpression
     | '(' expr ')' # parenthesis;
