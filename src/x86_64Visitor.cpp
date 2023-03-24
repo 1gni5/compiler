@@ -203,3 +203,25 @@ any x86_64Visitor::visitUnary(ccParser::UnaryContext *ctx)
 
     return name;
 }
+
+any x86_64Visitor::visitBitExpression(ccParser::BitExpressionContext *ctx)
+{
+    string left = any_cast<string>(visit(ctx->expr(0)));
+    string right = any_cast<string>(visit(ctx->expr(1)));
+
+    string name = "$tmp" + to_string(symbols.size());
+    symbols[name] = (symbols.size() + 1) * 4;
+
+    string op = ctx->op->getText();
+    map<string, string> verbs = {
+        {"&", "andl"},
+        {"|", "orl"},
+        {"^", "xorl"},
+    };
+
+    cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
+         << "\t" << verbs[op] <<"\t-" << symbols[left] << "(%rbp), %eax\n"
+         << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl;
+
+    return name;
+}

@@ -14,6 +14,7 @@ expr:
     | expr op=( '+' | '-' ) expr # addition
     | expr op=( '>=' | '<=' | '==' | '!=' | '>' | '<' ) expr # comparison
     | op=('-' | '!') expr # unary
+    | expr op=('&' | '|' | '^') expr #bitExpression
     | CONST # constExpression
     | IDENTIFIER # varExpression
     | '(' expr ')' # parenthesis;
