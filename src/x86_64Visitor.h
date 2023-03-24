@@ -11,21 +11,21 @@ using namespace std;
 class x86_64Visitor : public ccBaseVisitor
 {
 public:
-  virtual std::any visitAxiom(ccParser::AxiomContext *ctx);
-  virtual std::any visitProgram(ccParser::ProgramContext *ctx);
-  virtual std::any visitCompound(ccParser::CompoundContext *ctx);
+  virtual antlrcpp::Any visitAxiom(ccParser::AxiomContext *ctx);
+  virtual antlrcpp::Any visitProgram(ccParser::ProgramContext *ctx);
+  virtual antlrcpp::Any visitCompound(ccParser::CompoundContext *ctx);
 
-  virtual std::any visitReturnStmt(ccParser::ReturnStmtContext *ctx);
-  virtual std::any visitDeclaration(ccParser::DeclarationContext *ctx);
-  virtual std::any visitAssignement(ccParser::AssignementContext *ctx);
+  virtual antlrcpp::Any visitReturnStmt(ccParser::ReturnStmtContext *ctx);
+  virtual antlrcpp::Any visitDeclaration(ccParser::DeclarationContext *ctx);
+  virtual antlrcpp::Any visitAssignement(ccParser::AssignementContext *ctx);
 
-  virtual std::any visitParenthesis(ccParser::ParenthesisContext *ctx);
-  virtual std::any visitAddition(ccParser::AdditionContext *ctx);
-  virtual std::any visitMultiplication(ccParser::MultiplicationContext *ctx);
-  virtual std::any visitConstExpression(ccParser::ConstExpressionContext *ctx);
-  virtual std::any visitVarExpression(ccParser::VarExpressionContext *ctx);
+  virtual antlrcpp::Any visitParenthesis(ccParser::ParenthesisContext *ctx);
+  virtual antlrcpp::Any visitAddition(ccParser::AdditionContext *ctx);
+  virtual antlrcpp::Any visitMultiplication(ccParser::MultiplicationContext *ctx);
+  virtual antlrcpp::Any visitConstExpression(ccParser::ConstExpressionContext *ctx);
+  virtual antlrcpp::Any visitVarExpression(ccParser::VarExpressionContext *ctx);
 
-  virtual std::any visitComparison(ccParser::ComparisonContext *ctx);
+  virtual antlrcpp::Any visitComparison(ccParser::ComparisonContext *ctx);
 
 private:
   map<string, size_t> symbols;

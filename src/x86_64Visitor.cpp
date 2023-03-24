@@ -4,15 +4,15 @@
 #include "antlr4-runtime.h"
 #include "x86_64Visitor.h"
 
-using namespace std;
+using antlrcpp::Any;
 
-any x86_64Visitor::visitAxiom(ccParser::AxiomContext *ctx)
+Any x86_64Visitor::visitAxiom(ccParser::AxiomContext *ctx)
 {
     visit(ctx->program());
     return 0;
 }
 
-any x86_64Visitor::visitProgram(ccParser::ProgramContext *ctx)
+Any x86_64Visitor::visitProgram(ccParser::ProgramContext *ctx)
 {
     cout << ".globl main\n"
          << "main:\n"
@@ -22,7 +22,7 @@ any x86_64Visitor::visitProgram(ccParser::ProgramContext *ctx)
     return 0;
 }
 
-any x86_64Visitor::visitCompound(ccParser::CompoundContext *ctx)
+Any x86_64Visitor::visitCompound(ccParser::CompoundContext *ctx)
 {
     for (auto& stmt : ctx->statement())
     {
@@ -32,22 +32,22 @@ any x86_64Visitor::visitCompound(ccParser::CompoundContext *ctx)
 }
 
 
-any x86_64Visitor::visitReturnStmt(ccParser::ReturnStmtContext *ctx)
+Any x86_64Visitor::visitReturnStmt(ccParser::ReturnStmtContext *ctx)
 {
-    string name = any_cast<string>(visit(ctx->expr()));
+    string name = (visit(ctx->expr())).as<string>();
     cout << "\tmovl\t-" << symbols[name] << "(%rbp), %eax\n"
          << "\tpopq\t%rbp\n"
          << "\tret" << endl;
     return 0;
 }
 
-any x86_64Visitor::visitDeclaration(ccParser::DeclarationContext *ctx) 
+Any x86_64Visitor::visitDeclaration(ccParser::DeclarationContext *ctx) 
 {
     // Register in table of characters
     for (auto& id : ctx->IDENTIFIER())
     {
         string name = id->getText();
-        if (symbols.contains(name)) {throw runtime_error("Already declared.");}
+        if (symbols.count(name)>0) {throw runtime_error("Already declared.");}
         symbols[name] = (symbols.size() + 1) * 4;
     }
 
@@ -55,7 +55,7 @@ any x86_64Visitor::visitDeclaration(ccParser::DeclarationContext *ctx)
     {
         size_t index = ctx->IDENTIFIER().size();
         string left = ctx->IDENTIFIER(index - 1)->getText();
-        string right = any_cast<string>(visit(ctx->expr()));
+        string right = (visit(ctx->expr())).as<string>();
 
         cout << "\tmovl\t-" << symbols[right] << "(%rbp)" << ", %eax\n"
              << "\tmovl\t %eax, -" << symbols[left] << "(%rbp)" << endl;
@@ -66,10 +66,10 @@ any x86_64Visitor::visitDeclaration(ccParser::DeclarationContext *ctx)
     return 0;
 }
 
-any x86_64Visitor::visitAssignement(ccParser::AssignementContext *ctx)
+Any x86_64Visitor::visitAssignement(ccParser::AssignementContext *ctx)
 {
     string left = ctx->IDENTIFIER()->getText();
-    string right = any_cast<string>(visit(ctx->expr()));
+    string right = (visit(ctx->expr())).as<string>();
 
     cout << "\tmovl\t-" << symbols[right] << "(%rbp)" << ", %eax\n"
          << "\tmovl\t %eax, -" << symbols[left] << "(%rbp)" << endl;
@@ -77,7 +77,7 @@ any x86_64Visitor::visitAssignement(ccParser::AssignementContext *ctx)
     return left;
 }
 
-any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
+Any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
 {
     string name = "$tmp" + to_string(symbols.size());
     symbols[name] = (symbols.size() + 1) * 4;
@@ -87,17 +87,17 @@ any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitVarExpression(ccParser::VarExpressionContext *ctx)
+Any x86_64Visitor::visitVarExpression(ccParser::VarExpressionContext *ctx)
 {
     string name = ctx->IDENTIFIER()->getText();
-    if (!symbols.contains(name)) {throw runtime_error("Not declared.");}
+    if (!symbols.count(name)>0) {throw runtime_error("Not declared.");}
     return name;
 }
 
-any x86_64Visitor::visitAddition(ccParser::AdditionContext *ctx)
+Any x86_64Visitor::visitAddition(ccParser::AdditionContext *ctx)
 {
-    string left = any_cast<string>(visit(ctx->expr(0)));
-    string right = any_cast<string>(visit(ctx->expr(1)));
+    string left = (visit(ctx->expr(0))).as<string>();
+    string right = (visit(ctx->expr(1))).as<string>();
 
     string name = "$tmp" + to_string(symbols.size());
     symbols[name] = (symbols.size() + 1) * 4;
@@ -119,10 +119,10 @@ any x86_64Visitor::visitAddition(ccParser::AdditionContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
+Any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
 {
-    string left = any_cast<string>(visit(ctx->expr(0)));
-    string right = any_cast<string>(visit(ctx->expr(1)));
+    string left = (visit(ctx->expr(0))).as<string>();
+    string right = (visit(ctx->expr(1))).as<string>();
 
     string name = "$tmp" + to_string(symbols.size());
     symbols[name] = (symbols.size() + 1) * 4;
@@ -144,16 +144,16 @@ any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitParenthesis(ccParser::ParenthesisContext *ctx)
+Any x86_64Visitor::visitParenthesis(ccParser::ParenthesisContext *ctx)
 {
     return visit(ctx->expr());
 }
 
 
-any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
+Any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
 {
-    string left = any_cast<string>(visit(ctx->expr(0)));
-    string right = any_cast<string>(visit(ctx->expr(1)));
+    string left = (visit(ctx->expr(0))).as<string>();
+    string right = (visit(ctx->expr(1))).as<string>();
 
     string name = "$tmp" + to_string(symbols.size());
     symbols[name] = (symbols.size() + 1) * 4;

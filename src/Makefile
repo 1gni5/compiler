@@ -1,14 +1,14 @@
-ANTLR4_LIB=/usr/local/lib/
-ANTLR4_INCLUDE=/usr/local/include/antlr4-runtime
+ANTLR4_LIB=/usr/lib/x86_64-linux-gnu
+ANTLR4_INCLUDE=/usr/include/antlr4-runtime
 ANTLR_DIR=generated
-ANTR4_CMD=java -jar /usr/local/lib/antlr-4.12.0-complete.jar
+ANTR4_CMD=/usr/bin/antlr4
 
 ANTLR_FILES = $(wildcard $(ANTLR_DIR)/*.cpp)
 ANTLR_OBJS = $(patsubst $(ANTLR_DIR)/%.cpp,$(ANTLR_DIR)/%.o,$(ANTLR_FILES))
 ANTLR_OPTS=-visitor -no-listener -Dlanguage=Cpp
 
 CC=g++
-CCFLAGS=-std=c++20 -Wno-attributes -I$(ANTLR4_INCLUDE) -I$(ANTLR_DIR) -g
+CCFLAGS=-std=c++17 -Wno-attributes -I$(ANTLR4_INCLUDE) -I$(ANTLR_DIR) -g
 LDFLAGS=-L$(ANTLR4_LIB) -lantlr4-runtime
 EXEC=cc
 
