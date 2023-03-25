@@ -158,19 +158,27 @@ any x86_64Visitor::visitMultExpr(ccParser::MultExprContext *ctx)
     // Register a temporary variable to store the result of the expression
     string name = registerTemporary();
 
-    // For operator priority both * and / are in the same function
-    if (ctx->op->getText() == "*")
+    // For operator priority both *, / and % are in the same function
+    string op = ctx->op->getText();
+    if (op == "*")
     {
         cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
-             << "\timull\t-" << symbols[right] << "(%rbp), %eax\n"
-             << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)\n" << endl;
-    } else // / operator case
+             << "\timull\t-" << symbols[right] << "(%rbp), %eax" << endl;
+    } else // `%` and `/` operators
     {
         cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
              << "\tcltd\n" // Setup recovery point in case of / 0
-             << "\tidivl\t-" << symbols[right] << "(%rbp)\n"
-             << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)\n" << endl;
+             << "\tidivl\t-" << symbols[right] << "(%rbp)" << endl;
+
+        // Only difference between `%` and `/` is which register we
+        // take the result from : %eax -> `/` , %ead -> `%`
+        if (op == "%") {
+            cout << "\tmovl\t%edx, %eax" << endl;
+        }
     }
+    
+    // Move expression result in a temporary variable
+    cout << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)\n" << endl;
 
     return name;
 }
@@ -238,21 +246,28 @@ any x86_64Visitor::visitUnaryExpr(ccParser::UnaryExprContext *ctx)
     // Retreive temporary variable name with expression results
     string right = any_cast<string>(visit(ctx->expr()));
 
+    // As `+` does nothing, no need to create a new variable in memory
+    string op = ctx->op->getText();
+    if (op == "+"){return right;}
+
     // Register a temporary variable to store the result of the expression
     string name = registerTemporary(); 
 
     // For operator priority both - and ! are in the same function
-    if (ctx->op->getText() == "-")
+    if (op == "-")
     {
         cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
              << "\txorl\t%eax, %eax\n" 
              << "\tsubl\t-" << symbols[right] << "(%rbp), %eax" << endl;
-    } else { // case of ! operator
+    } else if (op == "!") { // case of ! operator
         cout << "\tcmpl\t$0,-" << symbols[right] << "(%rbp)\n"
              << "\tsetne\t%al\n"
              << "\txorb\t$-1, %al\n"
              << "\tandb\t$1, %al\n"
              << "\tmovzbl\t%al, %eax" << endl;
+    } else if (op == "~") {
+        cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
+             << "\tnotl\t%eax" << endl;
     }
 
     // Move the result of the expression in temporary variable
