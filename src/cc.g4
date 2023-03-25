@@ -7,16 +7,20 @@ compound : '{' statement* '}' ;
 
 statement : assignement | declaration | returnStmt;
 returnStmt: 'return' expr ';' ;
-declaration: 'int' IDENTIFIER (',' IDENTIFIER)* ('=' expr)?';' ;
+declaration: 'int' IDENTIFIER (',' IDENTIFIER)* ('=' expr)? ';' ;
 assignement: IDENTIFIER '=' expr ';' ;
+
 expr: 
-    expr op=( '*' | '/' ) expr # multiplication
-    | expr op=( '+' | '-' ) expr # addition
-    | expr op=( '>=' | '<=' | '==' | '!=' | '>' | '<' ) expr # comparison
-    | op=('-' | '!') expr # unary
-    | expr op=('&' | '|' | '^') expr #bitExpression
-    | CONST # constExpression
-    | IDENTIFIER # varExpression
+    op=('-' | '!' | '+' | '~') expr # unaryExpr
+    | expr op=( '*' | '/' | '%' ) expr # multExpr
+    | expr op=( '+' | '-' ) expr # addExpr
+    | expr op=( '>=' | '<=' | '>' | '<' ) expr # cmpExpr
+    | expr op=( '==' | '!=' ) expr # eqExpr
+    | expr '&' expr # bitAndExpr
+    | expr '^' expr # bitXorExpr
+    | expr '|' expr # bitOrExpr
+    | IDENTIFIER # varExpr
+    | CONST # cstExpr
     | '(' expr ')' # parenthesis;
 
 IDENTIFIER : [a-zA-Z]+;

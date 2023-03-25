@@ -24,16 +24,26 @@ public:
   virtual std::any visitAssignement(ccParser::AssignementContext *ctx);
 
   // Expressions
-  virtual std::any visitParenthesis(ccParser::ParenthesisContext *ctx);
-  virtual std::any visitAddition(ccParser::AdditionContext *ctx);
-  virtual std::any visitMultiplication(ccParser::MultiplicationContext *ctx);
-  virtual std::any visitConstExpression(ccParser::ConstExpressionContext *ctx);
-  virtual std::any visitVarExpression(ccParser::VarExpressionContext *ctx);
-  virtual std::any visitBitExpression(ccParser::BitExpressionContext *ctx);
+  // Const and variables
+  virtual std::any visitVarExpr(ccParser::VarExprContext *ctx);
+  virtual std::any visitCstExpr(ccParser::CstExprContext *ctx);
 
+  // Basic arithmetics
+  virtual std::any visitAddExpr(ccParser::AddExprContext *ctx);
+  virtual std::any visitMultExpr(ccParser::MultExprContext *ctx);
+
+  // Bit operators
+  virtual std::any visitBitAndExpr(ccParser::BitAndExprContext *ctx);
+  virtual std::any visitBitOrExpr(ccParser::BitOrExprContext *ctx);
+  virtual std::any visitBitXorExpr(ccParser::BitXorExprContext *ctx);
+
+  // Comparisons, Equalities
+  virtual std::any visitCmpExpr(ccParser::CmpExprContext *ctx);
+  virtual std::any visitEqExpr(ccParser::EqExprContext *ctx);
+  
   // Misc.
-  virtual std::any visitComparison(ccParser::ComparisonContext *ctx);
-  virtual std::any visitUnary(ccParser::UnaryContext *ctx);
+  virtual std::any visitUnaryExpr(ccParser::UnaryExprContext *ctx);
+  virtual std::any visitParenthesis(ccParser::ParenthesisContext *ctx);
 
 private:
   string registerTemporary();

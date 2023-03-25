@@ -42,7 +42,6 @@ any x86_64Visitor::visitCompound(ccParser::CompoundContext *ctx)
     return 0; // Dummy return
 }
 
-
 any x86_64Visitor::visitReturnStmt(ccParser::ReturnStmtContext *ctx)
 {
     // Retreive name of temporary variable with expression result
@@ -103,7 +102,7 @@ any x86_64Visitor::visitAssignement(ccParser::AssignementContext *ctx)
     return left;
 }
 
-any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
+any x86_64Visitor::visitCstExpr(ccParser::CstExprContext *ctx)
 {
     // Register a temporary variable to store the value of expression
     // NOTE: Not necessary to store every constante in memory, can be improved
@@ -116,7 +115,7 @@ any x86_64Visitor::visitConstExpression(ccParser::ConstExpressionContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitVarExpression(ccParser::VarExpressionContext *ctx)
+any x86_64Visitor::visitVarExpr(ccParser::VarExprContext *ctx)
 {
     // When expression is only a variable, just need to return the name
     string name = ctx->IDENTIFIER()->getText();
@@ -124,7 +123,7 @@ any x86_64Visitor::visitVarExpression(ccParser::VarExpressionContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitAddition(ccParser::AdditionContext *ctx)
+any x86_64Visitor::visitAddExpr(ccParser::AddExprContext *ctx)
 {
     // Retreive both left and right expression results
     string left = any_cast<string>(visit(ctx->expr(0)));
@@ -150,7 +149,7 @@ any x86_64Visitor::visitAddition(ccParser::AdditionContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
+any x86_64Visitor::visitMultExpr(ccParser::MultExprContext *ctx)
 {
     // Retreive both left and right expression results
     string left = any_cast<string>(visit(ctx->expr(0)));
@@ -176,14 +175,37 @@ any x86_64Visitor::visitMultiplication(ccParser::MultiplicationContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitParenthesis(ccParser::ParenthesisContext *ctx)
+any x86_64Visitor::visitCmpExpr(ccParser::CmpExprContext *ctx)
 {
-    // Return result of contained expression
-    return visit(ctx->expr());
+    // Retreive both left and right expression results
+    string left = any_cast<string>(visit(ctx->expr(0)));
+    string right = any_cast<string>(visit(ctx->expr(1)));
+
+    // Register a temporary variable to store the result of the expression
+    string name = registerTemporary();
+
+
+    // Assembly language resulting is very similar, so
+    // we only need to change one instruction
+    string op = ctx->op->getText();
+    map<string, string> verbs = {
+        {">=", "setge"},
+        {"<=", "setle"},
+        {">", "setg"},
+        {"<", "setl"}
+    };
+
+    cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
+         << "\tcmpl\t-" << symbols[right] << "(%rbp), %eax\n"
+         << "\t" << verbs[op] << "\t%al\n" // Insert the matching instruction
+         << "\tandb\t$1, %al\n"
+         << "\tmovzbl\t%al, %eax\n" 
+         << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl;
+    
+    return name;
 }
 
-
-any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
+any x86_64Visitor::visitEqExpr(ccParser::EqExprContext *ctx)
 {
     // Retreive both left and right expression results
     string left = any_cast<string>(visit(ctx->expr(0)));
@@ -198,11 +220,7 @@ any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
     string op = ctx->op->getText();
     map<string, string> verbs = {
         {"==", "sete"},
-        {"!=", "setne"},
-        {">=", "setge"},
-        {"<=", "setle"},
-        {">", "setg"},
-        {"<", "setl"},
+        {"!=", "setne"}
     };
 
     cout << "\tmovl\t-" << symbols[left] << "(%rbp), %eax\n"
@@ -215,8 +233,7 @@ any x86_64Visitor::visitComparison(ccParser::ComparisonContext *ctx)
     return name;
 }
 
-
-any x86_64Visitor::visitUnary(ccParser::UnaryContext *ctx)
+any x86_64Visitor::visitUnaryExpr(ccParser::UnaryExprContext *ctx)
 {
     // Retreive temporary variable name with expression results
     string right = any_cast<string>(visit(ctx->expr()));
@@ -244,7 +261,7 @@ any x86_64Visitor::visitUnary(ccParser::UnaryContext *ctx)
     return name;
 }
 
-any x86_64Visitor::visitBitExpression(ccParser::BitExpressionContext *ctx)
+any x86_64Visitor::visitBitAndExpr(ccParser::BitAndExprContext *ctx)
 {
     // Retreive both left and right expression results
     string left = any_cast<string>(visit(ctx->expr(0)));
@@ -252,18 +269,45 @@ any x86_64Visitor::visitBitExpression(ccParser::BitExpressionContext *ctx)
 
     string name = registerTemporary();
 
-    // Assembly language resulting is very similar, so
-    // we only need to change one instruction
-    string op = ctx->op->getText();
-    map<string, string> verbs = {
-        {"&", "andl"},
-        {"|", "orl"},
-        {"^", "xorl"},
-    };
-
     cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
-         << "\t" << verbs[op] <<"\t-" << symbols[left] << "(%rbp), %eax\n" // Insert matching instructions
+         << "\tandl\t-" << symbols[left] << "(%rbp), %eax\n"
          << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl; // Move result to temporary variable
 
     return name;
+}
+
+any x86_64Visitor::visitBitXorExpr(ccParser::BitXorExprContext *ctx)
+{
+    // Retreive both left and right expression results
+    string left = any_cast<string>(visit(ctx->expr(0)));
+    string right = any_cast<string>(visit(ctx->expr(1)));
+
+    string name = registerTemporary();
+
+    cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
+         << "\txorl\t-" << symbols[left] << "(%rbp), %eax\n"
+         << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl; // Move result to temporary variable
+
+    return name;
+}
+
+any x86_64Visitor::visitBitOrExpr(ccParser::BitOrExprContext *ctx)
+{
+    // Retreive both left and right expression results
+    string left = any_cast<string>(visit(ctx->expr(0)));
+    string right = any_cast<string>(visit(ctx->expr(1)));
+
+    string name = registerTemporary();
+
+    cout << "\tmovl\t-" << symbols[right] << "(%rbp), %eax\n"
+         << "\torl\t-" << symbols[left] << "(%rbp), %eax\n"
+         << "\tmovl\t%eax, -" << symbols[name] << "(%rbp)" << endl; // Move result to temporary variable
+
+    return name;
+}
+
+any x86_64Visitor::visitParenthesis(ccParser::ParenthesisContext *ctx)
+{
+    // Return result of contained expression
+    return visit(ctx->expr());
 }
