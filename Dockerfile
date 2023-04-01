@@ -21,7 +21,6 @@ RUN wget https://www.antlr.org/download/antlr-4.12.0-complete.jar -P /usr/local/
 
 # Set environment 
 ENV CLASSPATH=".:/usr/local/lib/antlr-4.12.0-complete.jar:$CLASSPATH"
-RUN echo "alias antlr4='java -jar /usr/local/lib/antlr-4.12.0-complete.jar'" > /root/.zshrc
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/local/include/ /usr/local/include/
 

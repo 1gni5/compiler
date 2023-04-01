@@ -27,3 +27,6 @@ antlr:
 
 clean:
 	rm -rf $(ANTLR_DIR) $(OBJS) $(EXEC)
+
+test:
+	@cd ../tests && python3 cc-test.py -w cc-wrapper.sh testfiles
