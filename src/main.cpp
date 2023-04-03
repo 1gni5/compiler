@@ -9,6 +9,8 @@
 #include "generated/ccBaseVisitor.h"
 
 #include "x86_64Visitor.h"
+#include "IRVisitor.h"
+#include "CFG.h"
 
 using namespace antlr4;
 using namespace std;
@@ -43,9 +45,8 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  
-  x86_64Visitor v;
-  v.visit(tree);
+  IRVisitor v;
+  CFG cfg = v.build(tree);
 
   return 0;
 }
