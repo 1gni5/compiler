@@ -1,9 +1,12 @@
 #pragma once
 
 #include <vector>
+
+class BB;
 #include "IRInstruction.h"
 
 using namespace std;
+
 
 class BB
 {

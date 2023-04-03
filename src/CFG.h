@@ -3,6 +3,7 @@
 #include <vector>
 #include <ostream>
 
+class CFG;
 #include "BB.h"
 
 using namespace std;
@@ -12,5 +13,4 @@ class CFG {
     vector<BB*> bbs;
 
     friend class IRVisitor;
-    friend ostream& operator<<(ostream& os, const CFG& cfg);
 };

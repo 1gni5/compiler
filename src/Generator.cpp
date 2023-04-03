@@ -1,10 +1,10 @@
 #include <queue>
 #include <variant>
 #include "Generator.h"
+#include "BB.h"
 
 using namespace std;
 
-void generate(BB* start);
 void x86_64_Generator::generate(BB* start)
 {
     // Insert prolog before entering the graph
@@ -21,9 +21,9 @@ void x86_64_Generator::generate(BB* start)
     {
         BB* current = waiting.front();
 
-        for (Instr& instr : current->instructions)
+        for (auto& instr : current->instructions)
         {
-            translate(instr);
+            
         }
 
         waiting.push(current->next);
@@ -38,7 +38,7 @@ void x86_64_Generator::generate(BB* start)
 
 void x86_64_Generator::translate(Store& intr)
 {
-    size_t offset = st[intr.name];
+    size_t offset = st[intr.destination];
     os  << "\tmovl\t$" << intr.value << ", -" << offset << "(%rbp)" << endl;
 }
 

@@ -2,19 +2,18 @@
 
 #include <variant>
 #include <string>
+
+#include "IRInstruction.h"
+
 using namespace std;
 
 
-
-class IRInstruction {
-    virtual void accept(Generator&) = 0;
-};
+class IRInstruction {};
 
 class Store : public IRInstruction
 {
     public:
     Store(string v, string d) :value(v), destination(d) {};
-    void accept(Generator& Generator) = {}
 
     private:
     string value;
@@ -33,5 +32,3 @@ class Ret : public IRInstruction
 
     friend class x86_64_Generator;
 };
-
-using Instr = variant<Store, Ret>;
